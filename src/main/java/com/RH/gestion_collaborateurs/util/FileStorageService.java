@@ -28,7 +28,16 @@ public class FileStorageService {
         }
     }
 
-    public String storeFile(MultipartFile file, String prefix) {
+    // Méthode pour créer un répertoire s'il n'existe pas
+    public void createDirectoryIfNotExists(String directoryPath) throws IOException {
+        Path path = this.fileStorageLocation.resolve(directoryPath);
+        if (!Files.exists(path)) {
+            Files.createDirectories(path);
+        }
+    }
+
+    // Méthode modifiée pour stocker le fichier dans un sous-dossier spécifique
+    public String storeFile(MultipartFile file, String subDirectory, String prefix) {
         try {
             // Vérifier le contenu du fichier
             if (file.getOriginalFilename() == null) {
@@ -41,26 +50,35 @@ public class FileStorageService {
             // Créer un nom de fichier unique
             String newFileName = prefix + "-" + UUID.randomUUID().toString() + "." + extension;
 
+            // Résoudre le chemin complet
+            Path subDirectoryPath = this.fileStorageLocation.resolve(subDirectory);
+
+            // S'assurer que le sous-répertoire existe
+            if (!Files.exists(subDirectoryPath)) {
+                Files.createDirectories(subDirectoryPath);
+            }
+
             // Copier le fichier vers le répertoire de destination
-            Path targetLocation = this.fileStorageLocation.resolve(newFileName);
+            Path targetLocation = subDirectoryPath.resolve(newFileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-            return newFileName;
+            // Retourner le chemin relatif pour le stockage en base de données
+            return subDirectory + "/" + newFileName;
         } catch (IOException ex) {
-            throw new RuntimeException("Échec du stockage du fichier.", ex);
+            throw new RuntimeException("Échec du stockage du fichier: " + ex.getMessage(), ex);
         }
     }
 
-    public void deleteFile(String fileName) {
+    public void deleteFile(String filePath) {
         try {
-            Path filePath = this.fileStorageLocation.resolve(fileName);
-            Files.deleteIfExists(filePath);
+            Path fullPath = this.fileStorageLocation.resolve(filePath);
+            Files.deleteIfExists(fullPath);
         } catch (IOException ex) {
-            throw new RuntimeException("Échec de la suppression du fichier.", ex);
+            throw new RuntimeException("Échec de la suppression du fichier: " + ex.getMessage(), ex);
         }
     }
 
-    public Path getFilePath(String fileName) {
-        return this.fileStorageLocation.resolve(fileName);
+    public Path getFilePath(String filePath) {
+        return this.fileStorageLocation.resolve(filePath);
     }
 }
