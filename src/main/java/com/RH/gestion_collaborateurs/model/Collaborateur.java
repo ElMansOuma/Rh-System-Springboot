@@ -53,6 +53,11 @@ public class Collaborateur {
     @Column(name = "photo", columnDefinition = "LONGBLOB")
     private byte[] photo;
 
+    // Ajouter la relation avec Admin
+    @ManyToOne
+    @JoinColumn(name = "admin_id")
+    private Admin assignedAdmin;
+
     // Enums internes
     public enum Sexe {
         Homme, Femme
@@ -253,5 +258,14 @@ public class Collaborateur {
 
     public void setPhoto(byte[] photo) {
         this.photo = photo;
+    }
+
+    // Getter et Setter pour assignedAdmin
+    public Admin getAssignedAdmin() {
+        return assignedAdmin;
+    }
+
+    public void setAssignedAdmin(Admin assignedAdmin) {
+        this.assignedAdmin = assignedAdmin;
     }
 }
