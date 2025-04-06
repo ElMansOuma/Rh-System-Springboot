@@ -53,7 +53,19 @@ public class AdminController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AdminDTO> updateAdmin(@PathVariable Long id, @RequestBody AdminDTO adminDTO) {
+    public ResponseEntity<AdminDTO> updateAdmin(@PathVariable Long id, @RequestBody Map<String, String> updateData) {
+        // Extract only the fields we need for profile update
+        AdminDTO adminDTO = new AdminDTO();
+        adminDTO.setFullName(updateData.get("fullName"));
+        adminDTO.setEmail(updateData.get("email"));
+
+        // We're keeping the other fields unchanged
+        AdminDTO currentAdmin = adminService.getAdminById(id);
+        adminDTO.setRole(currentAdmin.getRole());
+        adminDTO.setActive(currentAdmin.isActive());
+        adminDTO.setProfilePicture(currentAdmin.getProfilePicture());
+        adminDTO.setAssignedCollaborateurIds(currentAdmin.getAssignedCollaborateurIds());
+
         return ResponseEntity.ok(adminService.updateAdmin(id, adminDTO));
     }
 
@@ -64,7 +76,7 @@ public class AdminController {
     }
 
     @PutMapping("/{id}/password")
-    public ResponseEntity<AdminDTO> changePassword(
+    public ResponseEntity<?> changePassword(
             @PathVariable Long id,
             @RequestBody Map<String, String> passwordData) {
 
@@ -72,15 +84,27 @@ public class AdminController {
         String newPassword = passwordData.get("newPassword");
 
         if (currentPassword == null || newPassword == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", "Les champs mot de passe actuel et nouveau mot de passe sont requis"
+            ));
         }
 
-        return ResponseEntity.ok(adminService.updatePassword(id, currentPassword, newPassword));
+        try {
+            AdminDTO updatedAdmin = adminService.updatePassword(id, currentPassword, newPassword);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Mot de passe mis à jour avec succès",
+                    "admin", updatedAdmin
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "error", e.getMessage()
+            ));
+        }
     }
 
     @GetMapping("/me")
     public ResponseEntity<AdminDTO> getCurrentAdmin() {
-        // Obtenez l'utilisateur connecté à partir du contexte de sécurité
+        // Get the connected user from the security context
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
