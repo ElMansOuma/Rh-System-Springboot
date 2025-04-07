@@ -84,6 +84,11 @@ public class SecurityConfig {
                                 .requestMatchers("/api/collaborateurs/**").permitAll()
                                 .requestMatchers("/api/contrats/**").permitAll()
                                 .requestMatchers("/api/documents/**").permitAll()
+                                .requestMatchers("/api/pointages/**").permitAll()
+                                .requestMatchers("/api/retards/**").permitAll()
+
+                                // Ajoutez ces URLs dans la méthode de configuration de sécurité
+                                .requestMatchers("/swagger-ui/**", "/api-docs/**", "/v3/api-docs/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
