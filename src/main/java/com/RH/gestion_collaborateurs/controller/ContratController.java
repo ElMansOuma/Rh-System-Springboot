@@ -14,12 +14,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/contrats")
-@CrossOrigin(origins = "http://localhost:3000") // Adjust according to your frontend URL
+@CrossOrigin(origins = "http://localhost:3000")
 public class ContratController {
 
     @Autowired
     private ContratService contratService;
-
     @GetMapping
     public List<Contrat> getAllContrats() {
         return contratService.getAllContrats();
