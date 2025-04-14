@@ -2,10 +2,6 @@ package com.RH.gestion_collaborateurs.controller;
 
 import com.RH.gestion_collaborateurs.dto.CollaborateurDTO;
 import com.RH.gestion_collaborateurs.service.CollaborateurService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,24 +15,16 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/collaborateurs")
-@CrossOrigin(origins = "http://localhost:3000")
-@Tag(name = "Collaborateur", description = "API de gestion des collaborateurs")
+@CrossOrigin(origins = "*")
+
 public class CollaborateurController {
 
     private final CollaborateurService collaborateurService;
-
-
 
     @Autowired
     public CollaborateurController(CollaborateurService collaborateurService) {
         this.collaborateurService = collaborateurService;
     }
-    @Operation(summary = "Liste tous les collaborateurs",
-            description = "Renvoie la liste de tous les collaborateurs enregistrés")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Liste récupérée avec succès"),
-            @ApiResponse(responseCode = "401", description = "Non autorisé")
-    })
     @GetMapping
     public ResponseEntity<List<CollaborateurDTO>> getAllCollaborateurs() {
         List<CollaborateurDTO> collaborateurs = collaborateurService.getAllCollaborateurs();

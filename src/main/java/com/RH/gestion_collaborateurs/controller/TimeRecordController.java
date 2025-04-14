@@ -14,7 +14,7 @@ import com.RH.gestion_collaborateurs.service.TimeRecordService;
 
 @RestController
 @RequestMapping("/api/pointages")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 public class TimeRecordController {
 
     @Autowired
