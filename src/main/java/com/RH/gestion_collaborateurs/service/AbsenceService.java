@@ -27,7 +27,6 @@ public class AbsenceService {
     private AbsenceRepository absenceRepository;
 
     @Value("${app.upload.dir:uploads/justificatifs}")
-    private String uploadDir;
 
     private final Path fileStoragePath;
 
@@ -55,10 +54,6 @@ public class AbsenceService {
     }
 
     public Absence createAbsence(Absence absence) {
-        // Par défaut, le statut est "En attente" si non spécifié
-        if (absence.getStatus() == null || absence.getStatus().isEmpty()) {
-            absence.setStatus("En attente");
-        }
         return absenceRepository.save(absence);
     }
 
@@ -69,7 +64,6 @@ public class AbsenceService {
         absence.setDateDebut(absenceDetails.getDateDebut());
         absence.setDateFin(absenceDetails.getDateFin());
         absence.setMotif(absenceDetails.getMotif());
-        absence.setStatus(absenceDetails.getStatus());
         absence.setObservations(absenceDetails.getObservations());
 
         return absenceRepository.save(absence);
@@ -92,10 +86,9 @@ public class AbsenceService {
         absenceRepository.delete(absence);
     }
 
-    public Absence updateAbsenceStatus(Long id, String status, String observations) {
+    public Absence updateObservations(Long id, String observations) {
         Absence absence = getAbsenceById(id);
 
-        absence.setStatus(status);
         if (observations != null) {
             absence.setObservations(observations);
         }

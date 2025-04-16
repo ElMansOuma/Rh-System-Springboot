@@ -77,7 +77,6 @@ public class SecurityConfig {
                                 .requestMatchers("/api/pointages/**").permitAll()
                                 .requestMatchers("/api/retards/**").permitAll()
                                 .requestMatchers("/api/contrats/**").permitAll()
-                                .requestMatchers("/api/contrats/**").permitAll()
                                 .requestMatchers("/api/absences/**").permitAll()
                                 // Ajoutez ces URLs dans la méthode de configuration de sécurité
                                 .requestMatchers("/swagger-ui/**", "/api-docs/**", "/v3/api-docs/**").permitAll()
