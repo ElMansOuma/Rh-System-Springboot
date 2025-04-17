@@ -15,7 +15,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/collaborateurs")
-@CrossOrigin(origins = "*")
 
 public class CollaborateurController {
 

@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/absences")
-@CrossOrigin(origins = "*")
 public class AbsenceController {
 
     @Autowired

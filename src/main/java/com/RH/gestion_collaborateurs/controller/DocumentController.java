@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/documents")
-@CrossOrigin(origins = "*")
 
 public class DocumentController {
 

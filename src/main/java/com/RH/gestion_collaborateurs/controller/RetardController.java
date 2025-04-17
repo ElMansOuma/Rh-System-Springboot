@@ -15,7 +15,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/retards")
-@CrossOrigin(origins = "*")
 
 public class RetardController {
 

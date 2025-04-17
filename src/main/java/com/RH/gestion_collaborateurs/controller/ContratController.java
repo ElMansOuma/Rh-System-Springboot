@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/contrats")
-@CrossOrigin(origins = "*")
 
 public class ContratController {
 
