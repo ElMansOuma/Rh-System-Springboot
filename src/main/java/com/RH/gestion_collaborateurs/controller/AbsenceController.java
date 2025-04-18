@@ -3,6 +3,7 @@ package com.RH.gestion_collaborateurs.controller;
 import com.RH.gestion_collaborateurs.model.Absence;
 import com.RH.gestion_collaborateurs.model.MotifAbsence;
 import com.RH.gestion_collaborateurs.service.AbsenceService;
+import com.RH.gestion_collaborateurs.service.MotifAbsenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -12,17 +13,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api/absences")
 public class AbsenceController {
 
+    private static final Logger logger = Logger.getLogger(AbsenceController.class.getName());
+
     @Autowired
     private AbsenceService absenceService;
+
+    @Autowired
+    private MotifAbsenceService motifAbsenceService;
 
     @GetMapping
     public ResponseEntity<List<Absence>> getAllAbsences() {
@@ -43,23 +47,34 @@ public class AbsenceController {
     }
 
     @GetMapping("/motifs")
-    public ResponseEntity<List<String>> getAllMotifs() {
-        List<String> motifs = Arrays.stream(MotifAbsence.values())
-                .map(MotifAbsence::getLibelle)
-                .collect(Collectors.toList());
+    public ResponseEntity<List<MotifAbsence>> getAllMotifs() {
+        List<MotifAbsence> motifs = motifAbsenceService.getAllMotifs();
         return ResponseEntity.ok(motifs);
     }
 
     @PostMapping
-    public ResponseEntity<Absence> createAbsence(@RequestBody Absence absence) {
-        Absence createdAbsence = absenceService.createAbsence(absence);
-        return new ResponseEntity<>(createdAbsence, HttpStatus.CREATED);
+    public ResponseEntity<?> createAbsence(@RequestBody Absence absence) {
+        try {
+            logger.info("Received absence creation request: " + absence);
+            Absence createdAbsence = absenceService.createAbsence(absence);
+            return new ResponseEntity<>(createdAbsence, HttpStatus.CREATED);
+        } catch (Exception e) {
+            logger.severe("Error creating absence: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error creating absence: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Absence> updateAbsence(@PathVariable Long id, @RequestBody Absence absence) {
-        Absence updatedAbsence = absenceService.updateAbsence(id, absence);
-        return ResponseEntity.ok(updatedAbsence);
+    public ResponseEntity<?> updateAbsence(@PathVariable Long id, @RequestBody Absence absence) {
+        try {
+            Absence updatedAbsence = absenceService.updateAbsence(id, absence);
+            return ResponseEntity.ok(updatedAbsence);
+        } catch (Exception e) {
+            logger.severe("Error updating absence: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating absence: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")

@@ -2,7 +2,9 @@ package com.RH.gestion_collaborateurs.service;
 
 import com.RH.gestion_collaborateurs.exception.ResourceNotFoundException;
 import com.RH.gestion_collaborateurs.model.Absence;
+import com.RH.gestion_collaborateurs.model.MotifAbsence;
 import com.RH.gestion_collaborateurs.repository.AbsenceRepository;
+import com.RH.gestion_collaborateurs.repository.MotifAbsenceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -19,14 +21,18 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 @Service
 public class AbsenceService {
 
+    private static final Logger logger = Logger.getLogger(AbsenceService.class.getName());
+
     @Autowired
     private AbsenceRepository absenceRepository;
 
-    @Value("${app.upload.dir:uploads/justificatifs}")
+    @Autowired
+    private MotifAbsenceRepository motifAbsenceRepository;
 
     private final Path fileStoragePath;
 
@@ -54,7 +60,29 @@ public class AbsenceService {
     }
 
     public Absence createAbsence(Absence absence) {
-        return absenceRepository.save(absence);
+        try {
+            logger.info("Creating absence with data: " + absence);
+
+            // Vérifier si le motif est présent
+            if (absence.getMotif() == null || absence.getMotif().getId() == null) {
+                throw new IllegalArgumentException("Le motif d'absence est obligatoire");
+            }
+
+            // Vérifier si le motif existe et récupérer sa référence complète
+            MotifAbsence motif = motifAbsenceRepository.findById(absence.getMotif().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Motif d'absence non trouvé avec l'id : " + absence.getMotif().getId()));
+
+            // Assigner le motif complet
+            absence.setMotif(motif);
+
+            // Ne pas définir manuellement motifId car c'est une colonne en lecture seule
+            // liée à la relation JPA (@Column avec insertable=false, updatable=false)
+
+            return absenceRepository.save(absence);
+        } catch (Exception e) {
+            logger.severe("Error creating absence: " + e.getMessage());
+            throw e;
+        }
     }
 
     public Absence updateAbsence(Long id, Absence absenceDetails) {
@@ -63,7 +91,15 @@ public class AbsenceService {
         absence.setCollaborateurId(absenceDetails.getCollaborateurId());
         absence.setDateDebut(absenceDetails.getDateDebut());
         absence.setDateFin(absenceDetails.getDateFin());
-        absence.setMotif(absenceDetails.getMotif());
+
+        // Vérifier si le motif est présent
+        if (absenceDetails.getMotif() != null && absenceDetails.getMotif().getId() != null) {
+            MotifAbsence motif = motifAbsenceRepository.findById(absenceDetails.getMotif().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Motif d'absence non trouvé avec l'id : " + absenceDetails.getMotif().getId()));
+            absence.setMotif(motif);
+            // Ne pas définir manuellement motifId ici
+        }
+
         absence.setObservations(absenceDetails.getObservations());
 
         return absenceRepository.save(absence);
@@ -79,7 +115,7 @@ public class AbsenceService {
                 Files.deleteIfExists(filePath);
             } catch (IOException ex) {
                 // Log l'erreur mais continue la suppression
-                System.err.println("Impossible de supprimer le fichier justificatif: " + ex.getMessage());
+                logger.warning("Impossible de supprimer le fichier justificatif: " + ex.getMessage());
             }
         }
 

@@ -1,20 +1,28 @@
 package com.RH.gestion_collaborateurs.model;
 
-public enum MotifAbsence {
-    MALADIE("Maladie"),
-    CONGE_PAYE("Congé payé"),
-    CONGE_SANS_SOLDE("Congé sans solde"),
-    FORMATION("Formation"),
-    EVENEMENT_FAMILIAL("Événement familial"),
-    AUTRE("Autre");
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    private final String libelle;
+import jakarta.persistence.*;
 
-    MotifAbsence(String libelle) {
-        this.libelle = libelle;
-    }
+@Entity
+@Table(name = "motifs_absence")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class MotifAbsence {
 
-    public String getLibelle() {
-        return libelle;
-    }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String code;
+
+    @Column(nullable = false)
+    private String libelle;
+
+    @Column(nullable = false)
+    private String couleur; // Format hexa #RRGGBB
 }

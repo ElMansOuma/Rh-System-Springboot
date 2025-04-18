@@ -27,9 +27,13 @@ public class Absence {
     @Column(name = "date_fin", nullable = false)
     private LocalDate dateFin;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "motif_id", nullable = false)
     private MotifAbsence motif;
+
+    // Ajoutez ce champ pour correspondre à la colonne motif_id
+    @Column(name = "motif_id", insertable = false, updatable = false)
+    private Long motifId;
 
     @Column(columnDefinition = "TEXT")
     private String observations;
@@ -45,6 +49,4 @@ public class Absence {
         if (justificatifPath == null) return null;
         return "/api/absences/" + id + "/justificatif";
     }
-
-    // Vos getters et setters (vous pouvez les conserver ou les supprimer si vous utilisez Lombok @Data)
 }
